@@ -69,7 +69,7 @@ graph TD
     Dash -. "Polls /api/stats" .-> Go
     
     Go -- "Primary Rate Limit<br/>(Single RTT)" --> Redis
-    Go -- "Circuit Breaker<br/>(Fail-Open)" -.-> LocalFallback
+    Go -. "Circuit Breaker<br/>(Fail-Open)" .-> LocalFallback
 ```
 
 ---
