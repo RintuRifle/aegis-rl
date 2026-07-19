@@ -15,26 +15,35 @@ A high-performance, production-grade distributed rate limiter built in **Go** wi
 
 ## Architecture
 
-```
-                                    ┌──────────────────────────────┐
-                                    │     Next.js Dashboard         │
-                                    │  (Vercel) — real-time metrics │
-                                    └───────────────▲───────────────┘
-                                                    │ poll /api/stats
- ┌────────────┐     HTTPS      ┌───────────────────┴────────────────────┐
- │   Client    │───────────────▶│       AEGISRL EDGE BOUNCER (Go)        │
- │ (API caller)│                │  ── Caddy TLS termination + LB ──      │
- └────────────┘                │                                          │
-                                │  1. Extract identity (API key > IP)     │
-                                │  2. Redis EVALSHA (atomic Lua script)   │
-                                │  3. Circuit breaker wraps Redis call    │
-                                │  4. Fail-open to local token bucket    │
-                                └──────┬───────────────────────┬─────────┘
-                                       │                        │
-                          ┌────────────▼──────────┐    ┌────────▼─────────┐
-                          │   Redis — Atomic Lua   │    │  Local Fallback   │
-                          │   Token Bucket Script  │    │  (sync.Map)       │
-                          └────────────────────────┘    └──────────────────┘
+```mermaid
+graph TD
+    %% Styling
+    classDef client fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff,rx:8px,ry:8px
+    classDef dashboard fill:#000000,stroke:#333333,stroke-width:2px,color:#fff,rx:8px,ry:8px
+    classDef edge fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff
+    classDef redis fill:#dc2626,stroke:#b91c1c,stroke-width:2px,color:#fff,rx:8px,ry:8px
+    classDef local fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff,rx:8px,ry:8px
+
+    Client("👤 API Client"):::client
+    Dash("📊 Next.js Dashboard<br/>(Real-time metrics)"):::dashboard
+    
+    subgraph Edge["⚡ AegisRL Edge Bouncer (Go + Caddy)"]
+        direction TB
+        Caddy("🛡️ Caddy TLS / Load Balancer")
+        Go("⚙️ Go Engine<br/>1. Identity Extraction<br/>2. Redis EVALSHA<br/>3. Circuit Breaker")
+        Caddy --> Go
+    end
+    class Edge edge
+
+    Redis("🔴 Redis<br/>(Atomic Lua Script)"):::redis
+    LocalFallback("🟢 Local Fallback<br/>(sync.Map Bucket)"):::local
+
+    %% Connections
+    Client -- "HTTPS Request" --> Caddy
+    Dash -. "Polls /api/stats" .-> Go
+    
+    Go -- "Primary Rate Limit<br/>(Single RTT)" --> Redis
+    Go -- "Circuit Breaker<br/>(Fail-Open)" -.-> LocalFallback
 ```
 
 ## Key Features
