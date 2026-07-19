@@ -1,0 +1,24 @@
+# AegisRL Caddy Reverse Proxy Configuration
+# Load balances between two Go replicas with automatic HTTPS via Let's Encrypt.
+
+:80 {
+    # Round-robin load balancing between the two Go engine replicas
+    reverse_proxy aegisrl-1:8081 aegisrl-2:8082 {
+        lb_policy round_robin
+
+        # Active health checks — Caddy removes unhealthy replicas from the pool
+        health_uri /healthz
+        health_interval 5s
+        health_timeout 3s
+    }
+}
+
+# For production with a domain, replace :80 above with:
+# yourdomain.com {
+#     reverse_proxy aegisrl-1:8081 aegisrl-2:8082 {
+#         lb_policy round_robin
+#         health_uri /healthz
+#         health_interval 5s
+#         health_timeout 3s
+#     }
+# }

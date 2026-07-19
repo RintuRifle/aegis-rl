@@ -1,0 +1,17 @@
+# Prometheus scrape configuration for AegisRL
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "aegisrl-1"
+    static_configs:
+      - targets: ["aegisrl-1:9100"]
+        labels:
+          instance: "replica-1"
+
+  - job_name: "aegisrl-2"
+    static_configs:
+      - targets: ["aegisrl-2:9101"]
+        labels:
+          instance: "replica-2"

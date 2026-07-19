@@ -1,0 +1,44 @@
+# .gitignore for AegisX
+
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+aegisx
+
+# Test & benchmark artifacts
+*.test
+bench/results/
+*.prof
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+caddy_data/
+caddy_config/
+prometheus_data/
+
+# Environment
+.env
+.env.local
+
+# Node (dashboard)
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+
+# Logs
+*.log

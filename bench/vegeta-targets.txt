@@ -1,0 +1,9 @@
+# AegisRL Vegeta Benchmark Targets
+# Used by vegeta attack --targets=bench/vegeta-targets.txt
+
+# Demo API endpoint — rate limited
+GET http://localhost:8081/api/test
+X-API-Key: bench-test-key-001
+
+# Health check — not rate limited (baseline latency)
+GET http://localhost:8081/healthz
